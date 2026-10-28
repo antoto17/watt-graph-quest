@@ -23,7 +23,7 @@ describe("BFS connectivity", () => {
   it("ignores off and broken edges", () => {
     const adj = buildAdjacency(NODES, EDGES, { ...allOn(), k1: "broken", k2: "off" });
     const r = bfs("central", adj);
-    expect(r.has("sc_comercial1")).toBe(false);
+    expect(r.has("sc_minas")).toBe(false);
     expect(r.has("sc_pucarita")).toBe(false);
     expect(r.has("sc_huerto")).toBe(true);
   });
