@@ -38,7 +38,7 @@ describe("BFS connectivity", () => {
 });
 
 describe("mission 1", () => {
-  const m = MISSIONS[0];
+  const m = MISSIONS[0]!;
   it("every school has a valid route when all available connections are active", () => {
     const s = { ...m.initial };
     for (const id of m.toggleable) s[id] = "on";
@@ -59,7 +59,7 @@ describe("mission 1", () => {
 });
 
 describe("mission 2", () => {
-  const m = MISSIONS[1];
+  const m = MISSIONS[1]!;
   it("the fault really cuts Comercial 1 and an alternative restores it", () => {
     expect(schoolsPowered(m.initial).has("sc_comercial1")).toBe(false);
     expect(isMissionComplete(m, { ...m.initial, a2: "on" }, null)).toBe(true);
@@ -67,7 +67,7 @@ describe("mission 2", () => {
 });
 
 describe("mission 3", () => {
-  const m = MISSIONS[2];
+  const m = MISSIONS[2]!;
   it("accepts a cut vertex that darkens schools, rejects others", () => {
     expect(isCriticalNode(m.initial, "d1")).toBe(true);
     expect(isCriticalNode(m.initial, "d3")).toBe(false);
@@ -76,7 +76,7 @@ describe("mission 3", () => {
 });
 
 describe("mission 4", () => {
-  const m = MISSIONS[3];
+  const m = MISSIONS[3]!;
   it("can be solved with 2 repairs plus alternatives", () => {
     expect(schoolsPowered(m.initial).size).toBeLessThan(7);
     const s = { ...m.initial, u1: "on" as const, a5: "on" as const, a2: "on" as const };

@@ -197,7 +197,7 @@ export const NetworkMap = forwardRef<MapHandle, Props>(function NetworkMap(p, re
                 x={n.x}
                 y={n.y + r + (n.type === "distribution" ? 20 : 26)}
                 textAnchor="middle"
-                fontSize={n.type === "distribution" ? 15 : 19}
+                fontSize={n.type === "distribution" ? 20 : 25}
                 fontWeight={n.type === "distribution" ? 400 : 600}
                 className="map-label"
               >
