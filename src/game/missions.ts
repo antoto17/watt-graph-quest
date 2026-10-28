@@ -39,8 +39,15 @@ export const MISSIONS: Mission[] = [
       "¡La ciudad está a oscuras! La central está preparada, pero necesitás comprobar que la energía pueda llegar a todas las escuelas. Seleccioná las conexiones disponibles y verificá que cada escuela tenga un camino hasta la central.",
     goal: "Activá los interruptores troncales (líneas punteadas) hasta que las 7 escuelas tengan un camino activo desde la central.",
     kind: "power",
-    initial: states(Object.fromEntries(MAIN_SWITCHES.map((id) => [id, "off" as const]))),
-    toggleable: [...MAIN_SWITCHES, ...ALT],
+    // Cross-zone links are open, so each trunk switch really matters.
+    initial: states({
+      ...Object.fromEntries(MAIN_SWITCHES.map((id) => [id, "off" as const])),
+      c3: "off",
+      c4: "off",
+      e5: "off",
+      o5: "off",
+    }),
+    toggleable: MAIN_SWITCHES,
     repairable: [],
     repairBudget: 0,
     highlightAlternatives: false,
