@@ -71,7 +71,7 @@ export const MISSIONS: Mission[] = [
     id: 3,
     title: "El nodo crítico",
     instructions:
-      "Todas las rutas alternativas están abiertas. Algunos vértices son tan importantes que, si fallan, parte de la red queda aislada. Seleccioná un nodo y usá «Simular falla» para ver qué pasaría.",
+      "Las rutas alternativas están desconectadas. Algunos vértices son tan importantes que, si fallan, parte de la red queda aislada. Seleccioná un nodo y usá «Simular falla» para ver qué pasaría.",
     goal: "Encontrá un punto de articulación (subestación o nodo) cuya falla deje escuelas sin energía.",
     kind: "critical",
     initial: states({}),
