@@ -52,7 +52,7 @@ describe("mission 1", () => {
     const s = { ...m.initial };
     for (const id of ["m1", "m2", "m3", "m4", "m5"]) s[id] = "on";
     expect(isMissionComplete(m, s, null)).toBe(true);
-    s.m2 = "off";
+    s["m2"] = "off";
     expect(schoolsPowered(s).has("sc_comercial1")).toBe(false);
     expect(isMissionComplete(m, s, null)).toBe(false);
   });

@@ -8,8 +8,8 @@ const STATE_LABEL = { on: "Activa", off: "Desactivada", broken: "Averiada" } as 
 
 export function Game() {
   const [idx, setIdx] = useState(0);
-  const mission = MISSIONS[idx];
-  const [states, setStates] = useState<EdgeStates>(() => ({ ...MISSIONS[0].initial }));
+  const mission = MISSIONS[idx]!;
+  const [states, setStates] = useState<EdgeStates>(() => ({ ...MISSIONS[0]!.initial }));
   const [repairsUsed, setRepairsUsed] = useState(0);
   const [failedNode, setFailedNode] = useState<string | null>(null);
   const [criticalFound, setCriticalFound] = useState<string | null>(null);
@@ -46,7 +46,7 @@ export function Game() {
 
   const loadMission = (i: number) => {
     setIdx(i);
-    setStates({ ...MISSIONS[i].initial });
+    setStates({ ...MISSIONS[i]!.initial });
     setRepairsUsed(0);
     setFailedNode(null);
     setCriticalFound(null);
@@ -364,7 +364,7 @@ function Inspector(props: {
             return (
               <li key={e.id}>
                 <button className="hover:text-primary" onClick={() => props.onSelect({ kind: "edge", id: e.id })}>
-                  → {other.label} <span className="text-muted-foreground">({STATE_LABEL[props.states[e.id]]})</span>
+                  → {other.label} <span className="text-muted-foreground">({STATE_LABEL[props.states[e.id] ?? "off"]})</span>
                 </button>
               </li>
             );
@@ -379,7 +379,7 @@ function Inspector(props: {
     );
   }
   const e = EDGES.find((x) => x.id === sel.id)!;
-  const st = props.states[e.id];
+  const st = props.states[e.id] ?? "off";
   const canToggle = props.toggleable.has(e.id) && st !== "broken";
   const canRepair = st === "broken" && props.repairable.has(e.id);
   return (
