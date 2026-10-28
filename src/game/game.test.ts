@@ -23,7 +23,7 @@ describe("BFS connectivity", () => {
   it("ignores off and broken edges", () => {
     const adj = buildAdjacency(NODES, EDGES, { ...allOn(), k1: "broken", k2: "off" });
     const r = bfs("central", adj);
-    expect(r.has("sc_minas")).toBe(false);
+    expect(r.has("sc_comercial1")).toBe(false);
     expect(r.has("sc_pucarita")).toBe(false);
     expect(r.has("sc_huerto")).toBe(true);
   });
@@ -52,8 +52,8 @@ describe("mission 1", () => {
     const s = { ...m.initial };
     for (const id of ["m1", "m2", "m3", "m4", "m5", "m6"]) s[id] = "on";
     expect(isMissionComplete(m, s, null)).toBe(true);
-    s.m5 = "off";
-    expect(schoolsPowered(s).has("sc_minas")).toBe(false);
+    s.m2 = "off";
+    expect(schoolsPowered(s).has("sc_comercial1")).toBe(false);
     expect(isMissionComplete(m, s, null)).toBe(false);
   });
 });
