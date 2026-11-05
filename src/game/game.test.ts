@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { articulationPoints, bfs, buildAdjacency, countComponents, validateNetwork, type EdgeStates } from "./graph";
 import { EDGES, NODES, SCHOOLS } from "./network";
-import { MISSIONS, isCriticalNode, isMissionComplete, schoolsPowered } from "./missions";
+import { MISSIONS, isCriticalNode, isMissionComplete, planStep, schoolsPowered } from "./missions";
 
 const allOn = (): EdgeStates => Object.fromEntries(EDGES.map((e) => [e.id, "on"]));
 
@@ -48,13 +48,20 @@ describe("mission 1", () => {
     expect(schoolsPowered(m.initial).size).toBe(0);
     expect(isMissionComplete(m, m.initial, null)).toBe(false);
   });
-  it("wins only with all 7 schools; losing one route revokes the win", () => {
-    const s = { ...m.initial };
-    for (const id of ["m1", "m2", "m3", "m4", "m5"]) s[id] = "on";
-    expect(isMissionComplete(m, s, null)).toBe(true);
-    s["m2"] = "off";
-    expect(schoolsPowered(s).has("sc_comercial1")).toBe(false);
-    expect(isMissionComplete(m, s, null)).toBe(false);
+  it("a step only builds the single direct edge between current and next node", () => {
+    expect(planStep(m, m.initial, "central", "s_centro", 0)).toEqual({ kind: "build", edgeId: "m1" });
+    // Central -> Sub. Norte is not direct: nothing is built or skipped
+    expect(planStep(m, m.initial, "central", "s_norte", 0)).toEqual({ kind: "no-edge" });
+    expect(planStep(m, m.initial, "central", "central", 0)).toEqual({ kind: "same" });
+    expect(planStep(m, { ...m.initial, m1: "on" }, "central", "s_centro", 0)).toEqual({ kind: "move", edgeId: "m1" });
+  });
+  it("a school counts only with a full chain of built edges from the central", () => {
+    const s = { ...m.initial, m1: "on" as const, m5: "on" as const, n1: "on" as const };
+    expect(schoolsPowered(s).has("sc_minas")).toBe(false);
+    s.k1 = "on";
+    expect(schoolsPowered(s).has("sc_minas")).toBe(true);
+    s.m5 = "off";
+    expect(schoolsPowered(s).has("sc_minas")).toBe(false);
   });
 });
 

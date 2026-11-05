@@ -13,17 +13,16 @@ export interface MapHandle {
   center: () => void;
 }
 
-export type Selection = { kind: "node" | "edge"; id: string } | null;
-
 interface Props {
   states: EdgeStates;
   reachable: Set<string>;
   failedNode: string | null;
-  toggleable: Set<string>;
-  repairable: Set<string>;
+  built: Set<string>;
   highlightAlternatives: boolean;
-  selection: Selection;
-  onSelect: (s: Selection) => void;
+  startNode: string | null;
+  currentNode: string | null;
+  onNodeClick: (id: string) => void;
+  onBackground: () => void;
 }
 
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
@@ -88,10 +87,10 @@ export const NetworkMap = forwardRef<MapHandle, Props>(function NetworkMap(p, re
   const onPointerUp = () => {
     setTimeout(() => (drag.current = null), 0);
   };
-  const click = (s: Selection) => (e: React.MouseEvent) => {
+  const click = (id: string) => (e: React.MouseEvent) => {
     e.stopPropagation();
     if (drag.current?.moved) return;
-    p.onSelect(s);
+    p.onNodeClick(id);
   };
 
   return (
@@ -102,7 +101,7 @@ export const NetworkMap = forwardRef<MapHandle, Props>(function NetworkMap(p, re
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
-      onClick={() => !drag.current?.moved && p.onSelect(null)}
+      onClick={() => !drag.current?.moved && p.onBackground()}
       role="img"
       aria-label="Mapa de la red eléctrica"
     >
@@ -111,46 +110,37 @@ export const NetworkMap = forwardRef<MapHandle, Props>(function NetworkMap(p, re
           const a = NODE_BY_ID.get(e.source)!;
           const b = NODE_BY_ID.get(e.target)!;
           const st = p.states[e.id];
-          const selected = p.selection?.kind === "edge" && p.selection.id === e.id;
+          const built = p.built.has(e.id);
           const energized = st === "on" && p.reachable.has(e.source) && p.reachable.has(e.target);
           const alt = e.kind === "alternative";
-          let stroke = "var(--line-off)";
-          let dash: string | undefined = "10 10";
-          let width = e.kind === "main" ? 7 : 5;
+          let stroke = alt && p.highlightAlternatives ? "var(--alternative)" : "var(--line-off)";
+          let dash: string | undefined = "6 8";
+          let width = e.kind === "main" ? 3.5 : 2.5;
+          let opacity = 0.75;
           if (st === "broken") {
             stroke = "var(--fault)";
-            dash = "4 10";
+            dash = "3 7";
+            opacity = 1;
           } else if (st === "on") {
-            stroke = alt ? "var(--alternative)" : "var(--power)";
+            stroke = alt ? "var(--alternative)" : built ? "var(--school-on)" : "var(--power)";
             dash = undefined;
-          } else if (alt && p.highlightAlternatives) {
-            stroke = "var(--alternative)";
+            opacity = energized ? 1 : 0.45;
+            if (built) width += 1.5;
           }
-          const interactive = p.toggleable.has(e.id) || (st === "broken" && p.repairable.has(e.id));
-          if (interactive) width += 1;
           return (
-            <g key={e.id} onClick={click({ kind: "edge", id: e.id })} className="cursor-pointer" data-edge={e.id}>
-              {selected && <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="var(--foreground)" strokeWidth={width + 8} strokeOpacity={0.35} strokeLinecap="round" />}
-              <line
-                x1={a.x}
-                y1={a.y}
-                x2={b.x}
-                y2={b.y}
-                stroke={stroke}
-                strokeWidth={width}
-                strokeDasharray={dash}
-                strokeOpacity={st === "on" && !energized ? 0.4 : 1}
-                strokeLinecap="round"
-              />
+            <g key={e.id} data-edge={e.id} data-state={st} pointerEvents="none">
+              {built && st === "on" && (
+                <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={stroke} strokeWidth={width + 8} strokeOpacity={0.18} strokeLinecap="round" />
+              )}
+              <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={stroke} strokeWidth={width} strokeDasharray={dash} strokeOpacity={opacity} strokeLinecap="round" />
               {energized && (
-                <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="var(--foreground)" strokeWidth={2} strokeOpacity={0.7} className="edge-flow" />
+                <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="var(--foreground)" strokeWidth={1.2} strokeOpacity={0.6} className="edge-flow" />
               )}
               {st === "broken" && (
-                <text x={(a.x + b.x) / 2} y={(a.y + b.y) / 2 + 8} textAnchor="middle" fontSize={26} fill="var(--fault)" className="map-label" style={{ fill: "var(--fault)" }}>
+                <text x={(a.x + b.x) / 2} y={(a.y + b.y) / 2 + 7} textAnchor="middle" fontSize={22} className="map-label" style={{ fill: "var(--fault)" }}>
                   ✕
                 </text>
               )}
-              <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="transparent" strokeWidth={24} />
             </g>
           );
         })}
@@ -167,10 +157,13 @@ export const NetworkMap = forwardRef<MapHandle, Props>(function NetworkMap(p, re
                   : powered
                     ? "var(--school-on)"
                     : "var(--school-off)";
-          const selected = p.selection?.kind === "node" && p.selection.id === n.id;
+          const isStart = p.startNode === n.id;
+          const isCurrent = p.currentNode === n.id;
           const failed = p.failedNode === n.id;
           return (
-            <g key={n.id} onClick={click({ kind: "node", id: n.id })} className="cursor-pointer" data-node={n.id}>
+            <g key={n.id} onClick={click(n.id)} className="cursor-pointer" data-node={n.id}>
+              <circle cx={n.x} cy={n.y} r={r + 14} fill="transparent" />
+              {isCurrent && <circle cx={n.x} cy={n.y} r={r + 9} fill="none" stroke="var(--primary)" strokeWidth={4} strokeOpacity={0.9} className="animate-pulse" />}
               {(n.type === "school" && powered) || n.type === "central" ? (
                 <circle cx={n.x} cy={n.y} r={r + 10} fill={fill} opacity={0.25} />
               ) : null}
@@ -179,8 +172,8 @@ export const NetworkMap = forwardRef<MapHandle, Props>(function NetworkMap(p, re
                 cy={n.y}
                 r={r}
                 fill={fill}
-                stroke={failed ? "var(--fault)" : selected ? "var(--foreground)" : "var(--background)"}
-                strokeWidth={failed || selected ? 5 : 3}
+                stroke={failed ? "var(--fault)" : isStart ? "var(--accent)" : isCurrent ? "var(--primary)" : "var(--background)"}
+                strokeWidth={failed || isCurrent || isStart ? 6 : 3}
                 opacity={failed ? 0.45 : n.type !== "school" && n.type !== "central" && !powered ? 0.7 : 1}
               />
               {n.type === "school" && (
