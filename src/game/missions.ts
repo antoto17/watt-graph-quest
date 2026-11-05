@@ -29,25 +29,18 @@ function states(overrides: Record<string, EdgeState>): EdgeStates {
   return { ...s, ...overrides };
 }
 
-const MAIN_SWITCHES = ["m1", "m2", "m3", "m4", "m5", "m6"];
 
 export const MISSIONS: Mission[] = [
   {
     id: 1,
     title: "Primer encendido",
     instructions:
-      "¡La ciudad está a oscuras! La central está preparada, pero necesitás comprobar que la energía pueda llegar a todas las escuelas. Seleccioná las conexiones disponibles y verificá que cada escuela tenga un camino hasta la central.",
-    goal: "Activá los interruptores troncales (líneas punteadas) hasta que las 7 escuelas tengan un camino activo desde la central.",
+      "¡La ciudad está a oscuras! Construí los caminos vos: tocá la Central y después, uno por uno, cada nodo vecino hasta llegar a una escuela.",
+    goal: "Conectá las 7 escuelas con la central, conexión por conexión.",
     kind: "power",
-    // Cross-zone links are open, so each trunk switch really matters.
-    initial: states({
-      ...Object.fromEntries(MAIN_SWITCHES.map((id) => [id, "off" as const])),
-      c3: "off",
-      c4: "off",
-      e5: "off",
-      o5: "off",
-    }),
-    toggleable: MAIN_SWITCHES,
+    // Every line starts open: the player builds each connection by hand.
+    initial: Object.fromEntries(EDGES.map((e) => [e.id, "off" as const])),
+    toggleable: EDGES.map((e) => e.id),
     repairable: [],
     repairBudget: 0,
     highlightAlternatives: false,
@@ -119,4 +112,38 @@ export function isCriticalNode(s: EdgeStates, nodeId: string): boolean {
 export function isMissionComplete(m: Mission, s: EdgeStates, criticalFound: string | null): boolean {
   if (m.kind === "critical") return criticalFound !== null && isCriticalNode(s, criticalFound);
   return schoolsPowered(s).size === SCHOOLS.length;
+}
+
+/** Edge directly linking two nodes, if any. */
+export function findEdge(a: string, b: string) {
+  return EDGES.find((e) => (e.source === a && e.target === b) || (e.source === b && e.target === a));
+}
+
+export type StepResult =
+  | { kind: "same" }
+  | { kind: "no-edge" }
+  | { kind: "broken" }
+  | { kind: "no-repairs" }
+  | { kind: "locked" }
+  | { kind: "move"; edgeId: string }
+  | { kind: "build"; edgeId: string }
+  | { kind: "repair"; edgeId: string };
+
+/**
+ * One manual step from `current` to `target`. Only the single direct edge between them
+ * can change; intermediate nodes are never filled in.
+ */
+export function planStep(m: Mission, s: EdgeStates, current: string, target: string, repairsUsed: number): StepResult {
+  if (current === target) return { kind: "same" };
+  const edge = findEdge(current, target);
+  if (!edge) return { kind: "no-edge" };
+  const st = s[edge.id];
+  if (st === "on") return { kind: "move", edgeId: edge.id };
+  if (st === "broken") {
+    if (!m.repairable.includes(edge.id)) return { kind: "broken" };
+    if (repairsUsed >= m.repairBudget) return { kind: "no-repairs" };
+    return { kind: "repair", edgeId: edge.id };
+  }
+  if (!m.toggleable.includes(edge.id)) return { kind: "locked" };
+  return { kind: "build", edgeId: edge.id };
 }
