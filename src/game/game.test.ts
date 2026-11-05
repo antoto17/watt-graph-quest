@@ -56,7 +56,7 @@ describe("mission 1", () => {
     expect(planStep(m, { ...m.initial, m1: "on" }, "central", "s_centro", 0)).toEqual({ kind: "move", edgeId: "m1" });
   });
   it("a school counts only with a full chain of built edges from the central", () => {
-    const s = { ...m.initial, m1: "on" as const, m5: "on" as const, n1: "on" as const };
+    const s: EdgeStates = { ...m.initial, m1: "on", m5: "on", n1: "on" };
     expect(schoolsPowered(s).has("sc_minas")).toBe(false);
     s.k1 = "on";
     expect(schoolsPowered(s).has("sc_minas")).toBe(true);
