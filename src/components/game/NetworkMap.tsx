@@ -163,7 +163,7 @@ export const NetworkMap = forwardRef<MapHandle, Props>(function NetworkMap(p, re
           return (
             <g key={n.id} onClick={click(n.id)} className="cursor-pointer" data-node={n.id}>
               <circle cx={n.x} cy={n.y} r={r + 14} fill="transparent" />
-              {isCurrent && <circle cx={n.x} cy={n.y} r={r + 9} fill="none" stroke="var(--primary)" strokeWidth={2} strokeOpacity={0.5} className="animate-pulse" />}
+              {isCurrent && <circle cx={n.x} cy={n.y} r={r + 9} fill="none" stroke="var(--primary)" strokeWidth={4} strokeOpacity={0.9} className="animate-pulse" />}
               {(n.type === "school" && powered) || n.type === "central" ? (
                 <circle cx={n.x} cy={n.y} r={r + 10} fill={fill} opacity={0.25} />
               ) : null}
@@ -172,7 +172,7 @@ export const NetworkMap = forwardRef<MapHandle, Props>(function NetworkMap(p, re
                 cy={n.y}
                 r={r}
                 fill={fill}
-                stroke={failed ? "var(--fault)" : isCurrent ? "var(--primary)" : isStart ? "var(--accent)" : "var(--background)"}
+                stroke={failed ? "var(--fault)" : isStart ? "var(--accent)" : isCurrent ? "var(--primary)" : "var(--background)"}
                 strokeWidth={failed || isCurrent || isStart ? 6 : 3}
                 opacity={failed ? 0.45 : n.type !== "school" && n.type !== "central" && !powered ? 0.7 : 1}
               />
