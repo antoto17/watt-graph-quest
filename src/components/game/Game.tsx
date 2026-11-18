@@ -122,7 +122,7 @@ if (id === CENTRAL_ID && current && current !== CENTRAL_ID && mission.kind !== "
 }
 
 
-    // En la misión de nodos críticos solo seleccionamos el nodo.
+    
     if (mission.kind === "critical") {
       setStart(id);
       setCurrent(id);
@@ -130,7 +130,6 @@ if (id === CENTRAL_ID && current && current !== CENTRAL_ID && mission.kind !== "
       return;
     }
 
-    // Si todavía no hay un recorrido, comienza uno nuevo.
     if (!current) {
       setStart(id);
       setCurrent(id);
@@ -146,16 +145,13 @@ if (id === CENTRAL_ID && current && current !== CENTRAL_ID && mission.kind !== "
       return;
     }
 
-    // Comprueba si el nodo seleccionado ya pertenece al recorrido.
     const previousIndex = path.findIndex((p) => p.node === id);
 
-    // Si es un nodo anterior, retrocede directamente hasta él.
     if (previousIndex !== -1) {
   const target = path[previousIndex]!;
 
   const removedSteps = history.slice(target.historyLength);
 
-  // Restaura las conexiones construidas o reparadas después del nodo.
   setStates((s) => {
     const next = { ...s };
 
@@ -233,7 +229,6 @@ if (id === CENTRAL_ID && current && current !== CENTRAL_ID && mission.kind !== "
           [r.edgeId]: "on"
         }));
 
-        // Guarda el estado anterior para poder deshacerlo.
         setHistory((h) => [
           ...h,
           {
@@ -246,7 +241,6 @@ if (id === CENTRAL_ID && current && current !== CENTRAL_ID && mission.kind !== "
 
         setCurrent(id);
 
-        // Registra el nuevo nodo y la cantidad de pasos construidos.
         setPath((p) => [
           ...p,
           {
@@ -278,7 +272,6 @@ if (id === CENTRAL_ID && current && current !== CENTRAL_ID && mission.kind !== "
 
     if (!last) return;
 
-    // Restaura la conexión del último paso construido.
     setStates((s) => ({
       ...s,
       [last.edgeId]: last.prevState
@@ -286,7 +279,6 @@ if (id === CENTRAL_ID && current && current !== CENTRAL_ID && mission.kind !== "
 
     setHistory((h) => h.slice(0, -1));
 
-    // Vuelve al nodo desde el que se construyó esa conexión.
     setCurrent(last.prevCurrent);
 
     const previousIndex = path.findIndex(
@@ -442,6 +434,63 @@ if (id === CENTRAL_ID && current && current !== CENTRAL_ID && mission.kind !== "
             onNodeClick={onNodeClick}
             onBackground={() => {}}
           />
+
+{won && (
+  <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+    <div className="w-full max-w-lg rounded-2xl border-2 border-primary bg-background p-8 text-center shadow-2xl">
+
+      <div className="mb-4 text-6xl">🏆</div>
+
+      <h2 className="mb-3 text-3xl font-bold text-school-on">
+        {idx === MISSIONS.length - 1
+          ? "¡Juego completado!"
+          : "¡Misión completada!"}
+      </h2>
+
+      <p className="mb-2 text-xl font-semibold text-foreground">
+        {mission.title}
+      </p>
+
+      <p className="mb-6 text-base leading-relaxed text-muted-foreground">
+        {mission.winText}
+      </p>
+
+      <div className="mb-6 rounded-xl bg-muted/60 p-4">
+        <p className="text-sm text-muted-foreground">
+          Tiempo de la misión
+        </p>
+        <p className="mt-1 font-mono text-2xl font-bold text-primary">
+          {mm}:{ss}
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        {idx < MISSIONS.length - 1 ? (
+          <button
+            className="btn btn-primary w-full py-3 text-lg font-bold"
+            onClick={() => loadMission(idx + 1)}
+          >
+            Siguiente misión →
+          </button>
+        ) : (
+          <button
+            className="btn btn-primary w-full py-3 text-lg font-bold"
+            onClick={() => loadMission(0)}
+          >
+            Volver a jugar
+          </button>
+        )}
+
+        <button
+          className="btn w-full py-3"
+          onClick={() => loadMission(idx)}
+        >
+          Reintentar misión
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
           {notice && (
             <div
