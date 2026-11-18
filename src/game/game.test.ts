@@ -58,9 +58,10 @@ describe("mission 1", () => {
   it("a school counts only with a full chain of built edges from the central", () => {
     const s: EdgeStates = { ...m.initial, m1: "on", m5: "on", n1: "on" };
     expect(schoolsPowered(s).has("sc_minas")).toBe(false);
-    s.k1 = "on";
+   s["k1"] = "on";
+
     expect(schoolsPowered(s).has("sc_minas")).toBe(true);
-    s.m5 = "off";
+    s["m5"] = "off";
     expect(schoolsPowered(s).has("sc_minas")).toBe(false);
   });
 });
