@@ -137,13 +137,50 @@ export const NetworkMap = forwardRef<MapHandle, Props>(function NetworkMap(p, re
                 <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="var(--foreground)" strokeWidth={1.2} strokeOpacity={0.6} className="edge-flow" />
               )}
               {st === "broken" && (
-                <text x={(a.x + b.x) / 2} y={(a.y + b.y) / 2 + 7} textAnchor="middle" fontSize={22} className="map-label" style={{ fill: "var(--fault)" }}>
-                  ✕
-                </text>
-              )}
+              <g
+                transform={`translate(${(a.x + b.x) / 2}, ${(a.y + b.y) / 2})`} 
+                className="fault-icon"
+                >
+                  <title>Conexión averiada</title>
+                  <circle 
+                  r={19} fill="#431b1b" 
+                  stroke="#ef4444" 
+                  strokeWidth={2.5}/>
+                  <text
+                   x={0}
+                   y={8}
+                   textAnchor="middle"
+                   fontSize={25}
+                  >
+                    🔥
+                  </text>
+              </g>
+            )}
+            {alt && p.highlightAlternatives && st === "off" && (
+              <g
+              transform={`translate(${(a.x + b.x) / 2}, ${(a.y + b.y) / 2})`}
+              className="backup-icon"
+              >
+                <title>Ruta alternativa disponible</title>
+                <circle
+                r={18}
+                fill="#493313"
+                stroke="#f59e0b"
+                strokeWidth={2}
+              />
+              <text
+               x={0}
+               y={7}
+               textAnchor="middle"
+               fontSize={23}
+               > 
+               🛡️
+              </text>
             </g>
-          );
-        })}
+        )}
+      </g>
+    );
+})}
         {NODES.map((n) => {
           const r = n.type === "central" ? 34 : n.type === "substation" ? 24 : n.type === "school" ? 22 : 13;
           const powered = p.reachable.has(n.id);

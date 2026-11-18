@@ -4,20 +4,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/*
- * Design system definition.
- *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
- *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
- */
-
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -166,4 +152,175 @@
   stroke-dasharray: 8 16;
   animation: flow 0.8s linear infinite;
 }
+
+.fault-icon {
+  animation: fireAppear 0.45s ease-out both;
+  transform-box: view-box;
+}
+
+.backup-icon {
+  animation: backupAppear 0.5s ease-out both;
+  transform-box: view-box;
+}
+
+@keyframes fireAppear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes backupAppear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+
+.storm-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  overflow: hidden;
+  pointer-events: none;
+  background: rgba(6, 12, 31, 0.82);
+  animation: stormEntrance 2.5s ease-in-out both;
+}
+
+.storm-flash {
+  position: absolute;
+  inset: 0;
+  background: white;
+  opacity: 0;
+  animation: stormFlash 2.5s ease-in-out both;
+}
+
+.storm-lightning {
+  position: absolute;
+  font-size: clamp(65px, 12vw, 170px);
+  opacity: 0;
+  filter: drop-shadow(0 0 25px #facc15);
+}
+
+.lightning-one {
+  top: 5%;
+  left: 16%;
+  animation: lightningStrike 0.7s 0.2s both;
+}
+
+.lightning-two {
+  top: 10%;
+  right: 18%;
+  animation: lightningStrike 0.7s 0.9s both;
+}
+
+.lightning-three {
+  top: 30%;
+  left: 47%;
+  animation: lightningStrike 0.7s 1.5s both;
+}
+
+
+.storm-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(90%, 440px);
+  transform: translate(-50%, -50%);
+  text-align: center;
+  padding: 24px;
+  border-radius: 20px;
+  border: 2px solid #facc15;
+  background: rgba(15, 23, 42, 0.95);
+  box-shadow: 0 0 35px rgba(250, 204, 21, 0.35);
+  color: white;
+  animation: messageAppear 2.5s ease-in-out both;
+}
+
+.storm-message-icon {
+  display: block;
+  font-size: 52px;
+  margin-bottom: 10px;
+}
+
+.storm-message h2 {
+  font-size: clamp(18px, 3vw, 27px);
+  font-weight: 900;
+  color: #facc15;
+  margin-bottom: 12px;
+}
+
+.storm-message p {
+  font-size: 15px;
+  line-height: 1.6;
+}
+@keyframes stormEntrance {
+  0% {
+    opacity: 0;
+  }
+  12%, 80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes stormFlash {
+  0%, 10%, 20%, 38%, 55%, 100% {
+    opacity: 0;
+  }
+  12%, 40% {
+    opacity: 0.65;
+  }
+  14%, 42% {
+    opacity: 0.1;
+  }
+}
+
+@keyframes lightningStrike {
+  0%, 20%, 45%, 100% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  25%, 35% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes messageAppear {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -40%) scale(0.8);
+  }
+  20%, 75% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -55%) scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .storm-overlay,
+  .storm-flash,
+  .storm-lightning,
+  .storm-message,
+  .fault-icon,
+  .backup-icon {
+    animation: none;
+  }
+
+  .storm-overlay {
+    opacity: 0;
+  }
+}
+
 

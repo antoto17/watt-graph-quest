@@ -49,6 +49,7 @@ export function Game() {
   const [won, setWon] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
   const [seconds, setSeconds] = useState(0);
+  const [stormActive, setStormActive] = useState(false);
 
   const mapRef = useRef<MapHandle>(null);
 
@@ -90,6 +91,13 @@ export function Game() {
 
     return () => clearTimeout(t);
   }, [notice]);
+  useEffect(() => {
+    if (!stormActive) return;
+    const timer = setTimeout(() => {
+    setStormActive(false);
+  }, 2500);
+  return () => clearTimeout(timer);
+  }, [stormActive]);
 
   const loadMission = (i: number) => {
     setIdx(i);
@@ -103,6 +111,8 @@ export function Game() {
     setWon(false);
     setNotice(null);
     setSeconds(0);
+    setStormActive(i === 1 || i === 3);
+
   };
 
   const onNodeClick = (id: string) => {
@@ -422,6 +432,21 @@ if (id === CENTRAL_ID && current && current !== CENTRAL_ID && mission.kind !== "
 
       <div className="flex min-h-0 flex-1">
         <main className="relative min-w-0 flex-1">
+          {stormActive && (
+            <div className="storm-overlay" aria-label="Tormenta eléctrica en la ciudad">
+              <div className="storm-flash" />
+              <div className="storm-lightning lightning-one">⚡</div>
+              <div className="storm-lightning lightning-two">⚡</div>
+              <div className="storm-lightning lightning-three">⚡</div>
+              <div className="storm-message">
+                <span className="storm-message-icon">⛈️</span>
+                <h2>TORMENTA ELECTRICA!</h2>
+                <p>La red sufrió daños!
+                  <br />Revisá las conexiones y ayudá a recuperar la energía
+                </p>
+              </div>
+            </div>
+          )}
           <NetworkMap
             ref={mapRef}
             states={states}
